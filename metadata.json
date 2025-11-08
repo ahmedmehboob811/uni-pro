@@ -1,0 +1,5 @@
+{
+  "name": "V-CARE - AI Health Companion",
+  "description": "An AI-driven pharmacy and health assistant to help users find affordable medicine alternatives. Features bilingual support (English/Urdu), a patient dashboard, and location-based pharmacy finder for Karachi, Pakistan.",
+  "requestFramePermissions": []
+}
