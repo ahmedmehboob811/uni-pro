@@ -1,3 +1,4 @@
+
 export enum Language {
   EN = 'en',
   UR = 'ur',
@@ -9,6 +10,28 @@ export enum View {
   PHARMACIES = 'pharmacies',
   APPOINTMENTS = 'appointments',
   LOGIN = 'login',
+  HEALTH_PROFILE = 'health_profile',
+}
+
+export interface User {
+  name: string;
+  email: string;
+}
+
+export interface UserMedicine {
+    name: string;
+    dosage: string;
+    frequency: string;
+    reason: string;
+}
+
+export interface HealthRecord {
+    fullName: string;
+    age: string;
+    gender: 'Male' | 'Female' | 'Other' | '';
+    conditions: string;
+    allergies: string;
+    medicines: UserMedicine[];
 }
 
 export interface Medicine {
@@ -18,6 +41,7 @@ export interface Medicine {
   priceRange: string;
   form: string;
   stock?: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  dosage?: string;
 }
 
 export interface Appointment {

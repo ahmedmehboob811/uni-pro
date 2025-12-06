@@ -12,7 +12,7 @@ interface OrderConfirmationProps {
 
 export const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ language, orderItems, onBackToHome }) => {
     return (
-        <div className="max-w-2xl mx-auto my-12 p-8 bg-white rounded-xl shadow-lg text-center">
+        <div className="max-w-2xl mx-auto my-12 p-6 sm:p-8 bg-white rounded-xl shadow-lg text-center">
             <CheckCircleIcon className="w-20 h-20 text-green-500 mx-auto mb-4" />
             <h1 className="text-3xl font-bold text-gray-800">Order Placed Successfully!</h1>
             <p className="mt-2 text-gray-600">Thank you for your purchase. Your order will be processed shortly.</p>
