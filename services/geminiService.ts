@@ -59,26 +59,44 @@ export interface MedicineSearchResult {
     alternatives: Medicine[];
 }
 
+// Helper function to generate mock data
+const getMockData = (term: string): MedicineSearchResult => {
+    return {
+        original: {
+           brandName: term || 'Panadol',
+           genericFormula: 'Paracetamol',
+           manufacturer: 'GSK',
+           priceRange: 'PKR 30 - 40',
+           form: 'Tablet',
+           stock: 'In Stock',
+           dosage: '1-2 tablets every 4-6 hours'
+        },
+        alternatives: [
+          { brandName: 'Disprol', genericFormula: 'Paracetamol', manufacturer: 'Reckitt Benckiser', priceRange: 'PKR 25 - 35', form: 'Tablet', stock: 'In Stock', dosage: '1-2 tablets every 4-6 hours' },
+          { brandName: 'Calpol', genericFormula: 'Paracetamol', manufacturer: 'GSK', priceRange: 'PKR 40 - 50', form: 'Tablet', stock: 'Low Stock', dosage: '1-2 tablets every 4-6 hours' },
+          { brandName: 'Febrol', genericFormula: 'Paracetamol', manufacturer: 'Highnoon', priceRange: 'PKR 20 - 30', form: 'Tablet', stock: 'In Stock', dosage: '1-2 tablets every 4-6 hours' },
+          { brandName: 'Askprol', genericFormula: 'Paracetamol', manufacturer: 'Askari', priceRange: 'PKR 15 - 25', form: 'Tablet', stock: 'In Stock', dosage: '1-2 tablets every 4-6 hours' },
+        ]
+    };
+};
+
 export const findMedicineAlternatives = async (medicineName: string, imageBase64?: string): Promise<MedicineSearchResult> => {
+  // Add stock status helper
+  const addStock = (med: Medicine) => ({
+    ...med,
+    stock: med.stock || (Math.random() > 0.8 ? 'Low Stock' : (Math.random() > 0.9 ? 'Out of Stock' : 'In Stock'))
+  } as Medicine);
+
   // Check if the `ai` instance was successfully initialized.
   if (!ai) {
-      // Simulate a delay and return mock data if API key is not present
-      console.log("Simulating API call...");
-      return new Promise(resolve => setTimeout(() => resolve({
-          original: {
-             brandName: medicineName || 'Mock Medicine from Image',
-             genericFormula: 'Amoxicillin + Clavulanic Acid',
-             manufacturer: 'Original Pharma',
-             priceRange: 'PKR 450 - 500',
-             form: 'Tablet',
-             stock: 'In Stock',
-             dosage: '1 tablet every 12 hours'
-          },
-          alternatives: [
-            { brandName: 'Sim-Amoxil', genericFormula: 'Amoxicillin + Clavulanic Acid', manufacturer: 'Sim-Pharma', priceRange: 'PKR 180 - 220', form: 'Tablet', stock: 'In Stock', dosage: '1 tablet every 12 hours' },
-            { brandName: 'Mock-Clav', genericFormula: 'Amoxicillin + Clavulanic Acid', manufacturer: 'Pak-Mocks', priceRange: 'PKR 150 - 190', form: 'Tablet', stock: 'Low Stock', dosage: '1 tablet every 12 hours' },
-          ]
-      }), 1500));
+      console.log("Mock Mode: API Key missing.");
+      return new Promise(resolve => setTimeout(() => {
+          const mock = getMockData(medicineName);
+          resolve({
+              original: addStock(mock.original),
+              alternatives: mock.alternatives.map(addStock)
+          });
+      }, 1000));
   }
 
   try {
@@ -143,20 +161,19 @@ export const findMedicineAlternatives = async (medicineName: string, imageBase64
     const jsonText = response.text.trim();
     const result = JSON.parse(jsonText);
     
-    // Add random stock status
-    const addStock = (med: Medicine) => ({
-        ...med,
-        stock: Math.random() > 0.8 ? 'Low Stock' : (Math.random() > 0.9 ? 'Out of Stock' : 'In Stock')
-    } as Medicine);
-
     return {
         original: addStock(result.original),
         alternatives: result.alternatives.map(addStock)
     };
 
-  } catch (error) {
-    console.error("Error calling Gemini API:", error);
-    throw new Error("Failed to fetch medicine alternatives from AI.");
+  } catch (error: any) {
+    console.warn("Gemini API Error (Falling back to Mock Data):", error.message);
+    // FALLBACK: If API fails (e.g. 429 Quota Exceeded), return Mock Data so app doesn't crash
+    const mock = getMockData(medicineName);
+    return {
+        original: addStock(mock.original),
+        alternatives: mock.alternatives.map(addStock)
+    };
   }
 };
 
@@ -167,7 +184,6 @@ export interface ChatMessage {
 
 export const getChatResponse = async (history: ChatMessage[], newMessage: string): Promise<string> => {
     if (!ai) {
-        // Mock response
         return new Promise(resolve => setTimeout(() => resolve("I am currently in mock mode. I can only provide real health advice when connected to the Gemini API. However, usually, you should consult a doctor for this query."), 1000));
     }
 
@@ -199,8 +215,9 @@ export const getChatResponse = async (history: ChatMessage[], newMessage: string
         const result = await chat.sendMessage({ message: newMessage });
         return result.text;
 
-    } catch (error) {
+    } catch (error: any) {
         console.error("Error in chat:", error);
-        return "I'm having trouble connecting to the server right now. Please try again later.";
+        // Fallback response if chat fails
+        return "I apologize, but I'm having trouble accessing my medical database right now. Please verify your internet connection or try again later. For immediate medical concerns, please consult a doctor.";
     }
 };

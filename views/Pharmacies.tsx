@@ -44,7 +44,8 @@ export const Pharmacies: React.FC<PharmaciesProps> = ({ language }) => {
           setUserLocation(coords);
           generateNearbyPharmacies(coords);
       } catch (err: any) {
-          console.warn("Location error:", err.message || err);
+          // Fallback to default but keep console clean
+          console.warn("Location access denied or failed. Using default location.");
           const defaultCoords = { latitude: 24.8607, longitude: 67.0011 };
           setUserLocation(defaultCoords);
           generateNearbyPharmacies(defaultCoords);

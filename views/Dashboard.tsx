@@ -161,7 +161,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ language, user, setView, o
                 <span className="text-xs font-bold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full uppercase tracking-wide">Last 6 Months</span>
             </div>
             
-            <div className="h-[280px] w-full">
+            <div className="h-[280px] w-full min-h-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={mockHealthData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                     <defs>
